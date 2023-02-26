@@ -10,6 +10,17 @@ import (
 	"strings"
 )
 
+/**
+Creates an encryptor for queryable text strings that uses standard password-based encryption.
+Uses a 16-byte all-zero initialization vector so encrypting the same data results in the same encryption result.
+This is done to allow encrypted data to be queried against. Encrypted text is hex-encoded.
+Deprecated
+
+Params:
+	password – the password used to generate the encryptor's secret key; should not be shared
+	salt – a hex-encoded, random, site-global salt value to use to generate the secret key
+*/
+
 func Decrypt4QueryableText(cipherBytes []byte, passwordBytes []byte, saltBytes []byte) string {
 	key := pbkdf2.Key(passwordBytes, saltBytes, 1024, 32, sha1.New)
 	if len(key) != 32 {
@@ -29,7 +40,7 @@ func Decrypt4QueryableText(cipherBytes []byte, passwordBytes []byte, saltBytes [
 
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(plainText, cipherBytes)
-	return strings.Trim(string(plainText), "\b")
+	return strings.TrimSpace(string(plainText))
 }
 
 func Encrypt4QueryableText(plainBytes []byte, passwordBytes []byte, saltBytes []byte) string {
